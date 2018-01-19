@@ -1,31 +1,138 @@
+import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Component } from '@angular/core';
+import { HttpClient  } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   template: `
     <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <img width="300" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+    <div style="text-align:center; width: 600px; margin: 0 auto;">
+
+      <div>
+        <form [formGroup]="rForm" (ngSubmit)="onSubmit(rForm.value)">
+          <div class="form-container">
+            <div class="row columns">
+              <h1>Hackathon Api Tester</h1>
+              <table style="width: 100%; text-align:left;" >
+                <tr>
+                  <td>Gender</td>
+                  <td>
+                    <select formControlName="gender">
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Date of birth</td>
+                  <td>
+                    <input type="text" formControlName="dob"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Marital Status</td>
+                  <td>
+                    <select formControlName="family">
+                      <option value="S">Single</option>
+                      <option value="C">In Couple</option>
+                      <option value="F">Family with 1 children</option>
+                      <option value="L">Family 2 childrens or more</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>What is your average usage?</td>
+                  <td>
+                    <select formControlName="usage">
+                      <option value="C">Daily Commuting</option>
+                      <option value="W">Weekend Getaway</option>
+                      <option value="T">Transporting peoples or goods</option>
+                      <option value="S">Sports Weekend</option>
+                    </select>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>What is your favorite environement?</td>
+                  <td>
+                    <select formControlName="environment">
+                      <option value="C">City</option>
+                      <option value="Y">Country</option>
+                      <option value="W">Wilderness</option>
+                    </select>
+                  </td>
+                </tr>
+            
+                <tr>
+                  <td>What are you doing in life?</td>
+                  <td>
+                    <select formControlName="career">
+                      <option value="S">Student</option>
+                      <option value="H">Stay-at-home</option>
+                      <option value="E">Employee</option>
+                      <option value="P">Professional</option>
+                      <option value="R">Retired</option>
+                      
+                    </select>
+                  </td>
+                </tr>
+
+                <tr *ngIf="rForm.controls.usage.value=='T'">
+                  <td>What kind of goods are you transporting?</td>
+                  <td>
+                    <select formControlName="goods">
+                      <option value="P">Peoples, Taxi</option>
+                      <option value="F">Food</option>
+                      <option value="S">Small packages, courrier</option>
+                      <option value="M">Materials</option>
+                      <option value="V">Vehicles</option>
+                    </select>
+                  </td>
+                </tr>
+
+              </table>
+             
+              <br/><br/><br/>
+              <input type="submit" class="button expanded" value="Submit Form" [disabled]="!rForm.valid">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div *ngIf="results">
+        <h1>Results</h1>
+        <pre style="text-align:left">{{results | json}}</pre>
+      </div>
     </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    
-  `,
-  styles: []
+  `
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'app';
+  
+  rForm: FormGroup;
+  results; 
+
+  constructor(private _http: HttpClient, private fb: FormBuilder){
+    this.rForm = fb.group({
+      'usage': [null, Validators.required],
+      'environment': [null, Validators.required],
+      'career': [null, Validators.required],
+      'family': [null, Validators.required],
+      'gender': [null, Validators.required],
+      'dob': [null, Validators.required],
+      'goods' : [null]
+    });
+  }
+
+  ngOnInit() {}
+
+  onSubmit(formData) {
+    this._http.post('http://hackathon.sebdevlab.com?key=absdc', formData).subscribe(data => {
+      console.log('data111', data);
+      this.results = data.results.data;
+    })
+  }
+
+
 }
